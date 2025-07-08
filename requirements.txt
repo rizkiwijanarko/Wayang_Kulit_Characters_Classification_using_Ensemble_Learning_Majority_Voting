@@ -1,0 +1,10 @@
+pandas~=2.2.3
+numpy~=1.26.4
+opencv-python~=4.10.0.84
+ultralytics~=8.3.49
+matplotlib~=3.9.3
+scikit-learn~=1.5.2
+tensorflow~=2.18.0
+kagglehub~=0.3.12
+seaborn~=0.13.2
+scipy~=1.14.1
