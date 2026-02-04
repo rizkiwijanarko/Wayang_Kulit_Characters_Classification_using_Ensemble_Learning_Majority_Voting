@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klasifikasi Wayang Kulit AI - Indonesian Shadow Puppet Classifier</title>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;600;700&family=Open+Sans:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #7c3aed;
+            --primary-dark: #5b21b6;
+            --secondary: #f59e0b;
+            --accent: #ec4899;
+            --background: #fefefe;
+            --surface: #ffffff;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border: #e5e7eb;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Header */
+        .header {
+            background: var(--surface);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 0;
+        }
+
+        .logo {
+            font-family: 'Work Sans', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 4rem 0;
+            text-align: center;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: white;
+        }
+
+        .hero h1 {
+            font-family: 'Work Sans', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-button {
+            background: var(--secondary);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .cta-button:hover {
+            background: #d97706;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 4rem 0;
+        }
+
+        .classifier-section {
+            background: var(--surface);
+            border-radius: 1rem;
+            padding: 3rem;
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 4rem;
+        }
+
+        .section-title {
+            font-family: 'Work Sans', sans-serif;
+            font-size: 2rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--primary);
+        }
+
+        /* Upload Area */
+        .upload-area {
+            border: 3px dashed var(--border);
+            border-radius: 1rem;
+            padding: 3rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin-bottom: 2rem;
+        }
+
+        .upload-area:hover,
+        .upload-area.dragover {
+            border-color: var(--primary);
+            background: #faf5ff;
+        }
+
+        .upload-icon {
+            width: 4rem;
+            height: 4rem;
+            margin: 0 auto 1rem;
+            color: var(--text-secondary);
+        }
+
+        .upload-text {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-button {
+            background: var(--primary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .upload-button:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Image Preview */
+        .image-preview {
+            display: none;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 0.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 1rem;
+        }
+
+        .classify-button {
+            background: var(--secondary);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .classify-button:hover {
+            background: #d97706;
+        }
+
+        .classify-button:disabled {
+            background: var(--text-secondary);
+            cursor: not-allowed;
+        }
+
+        /* Loading */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            width: 3rem;
+            height: 3rem;
+            border: 4px solid var(--border);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Results */
+        .results {
+            display: none;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .result-title {
+            font-family: 'Work Sans', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #166534;
+            margin-bottom: 1rem;
+        }
+
+        .result-character {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .result-confidence {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .result-description {
+            line-height: 1.7;
+        }
+
+        /* Character Information Styles */
+        .character-info {
+            background: var(--surface);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-top: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .character-info h4 {
+            font-family: 'Work Sans', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 0.5rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .info-item {
+            background: #faf5ff;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid var(--primary);
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .character-story {
+            background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin-top: 1.5rem;
+            border: 1px solid #e9d5ff;
+        }
+
+        .story-title {
+            font-family: 'Work Sans', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .pronunciation {
+            background: var(--secondary);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 1rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-block;
+            margin-left: 0.5rem;
+        }
+
+        /* Error */
+        .error {
+            display: none;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            color: #dc2626;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 4rem 0;
+            background: var(--surface);
+        }
+
+        .features-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+            padding: 2rem;
+            border-radius: 1rem;
+            text-align: center;
+            border: 1px solid #e9d5ff;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .feature-icon {
+            width: 3rem;
+            height: 3rem;
+            color: var(--primary);
+            margin: 0 auto 1.5rem;
+        }
+
+        .feature-title {
+            font-family: 'Work Sans', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="#" class="logo">🎭 Wayang Kulit AI</a>
+                <nav>
+                    <ul class="nav-links">
+                        <li><a href="#classifier">Klasifikasi</a></li>
+                        <li><a href="#features">Fitur</a></li>
+                        <li><a href="#about">Tentang</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>Klasifikasi Wayang Kulit dengan AI</h1>
+            <p>Temukan karakter wayang kulit Indonesia menggunakan teknologi kecerdasan buatan terdepan. Unggah gambar dan dapatkan identifikasi karakter secara instan.</p>
+            <a href="#classifier" class="cta-button">Mulai Klasifikasi</a>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Classifier Section -->
+            <section id="classifier" class="classifier-section">
+                <h2 class="section-title">Unggah Gambar Wayang Kulit</h2>
+
+                <!-- Added form element to work with Flask backend -->
+                <form id="uploadForm" method="POST" enctype="multipart/form-data" action="/">
+                    <div class="upload-area" id="uploadArea">
+                        <svg class="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                        <p class="upload-text">Seret dan lepas gambar di sini, atau klik untuk memilih file</p>
+                        <button type="button" class="upload-button">
+                            Pilih Gambar
+                        </button>
+                        <input type="file" id="fileInput" name="file" class="file-input" accept="image/*" required>
+                    </div>
+
+                    <div class="image-preview" id="imagePreview">
+                        <img id="previewImage" class="preview-image" alt="Preview">
+                        <br>
+                        <button type="submit" class="classify-button" id="classifyButton">
+                            Klasifikasi Karakter
+                        </button>
+                    </div>
+                </form>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Menganalisis gambar wayang kulit...</p>
+                </div>
+
+                <!-- Updated results section to work with Flask template variables -->
+                <div class="results" id="results" style="display: {{ 'block' if prediction else 'none' }};">
+                    <h3 class="result-title">Hasil Klasifikasi</h3>
+                    <div class="result-character">{{ prediction or '' }}</div>
+                    <div class="result-description">
+                        {% if prediction %}
+                            Karakter wayang kulit "{{ prediction }}" telah berhasil diidentifikasi dari gambar yang Anda unggah.
+                        {% endif %}
+                    </div>
+
+                    <!-- Added comprehensive character information section -->
+                    {% if prediction %}
+                    <div class="character-info">
+                        <h4>📚 Informasi Karakter</h4>
+
+                        <div id="characterDetails">
+                            <!-- Character information will be populated by JavaScript based on prediction -->
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Updated error section to work with Flask template variables -->
+                <div class="error" id="error" style="display: {{ 'block' if error else 'none' }};">
+                    <p>{{ error or '' }}</p>
+                </div>
+
+                <!-- Show uploaded image if available from Flask -->
+                {% if image_data_url %}
+                <div class="uploaded-image" style="text-align: center; margin-top: 2rem;">
+                    <h4 style="margin-bottom: 1rem; color: var(--primary);">Gambar yang Dianalisis:</h4>
+                    <img src="{{ image_data_url }}" alt="Uploaded Image" style="max-width: 100%; max-height: 400px; border-radius: 0.5rem; box-shadow: var(--shadow);">
+                </div>
+                {% endif %}
+            </section>
+
+            <!-- Features Section -->
+            <section id="features" class="features">
+                <div class="container">
+                    <h2 class="section-title">Mengapa Memilih Wayang Kulit AI?</h2>
+                    <div class="features-container">
+                        <div class="feature-card">
+                            <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                            <h3 class="feature-title">Klasifikasi Cepat</h3>
+                            <p>Identifikasi karakter wayang kulit dalam hitungan detik menggunakan teknologi AI terdepan yang telah dioptimalkan untuk performa maksimal.</p>
+                        </div>
+
+                        <div class="feature-card">
+                            <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                            </svg>
+                            <h3 class="feature-title">Akurasi Tinggi</h3>
+                            <p>Model AI yang dilatih dengan dataset komprehensif karakter wayang kulit tradisional Indonesia untuk hasil yang akurat dan terpercaya.</p>
+                        </div>
+
+                        <div class="feature-card">
+                            <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13m0-13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                            </svg>
+                            <h3 class="feature-title">Informasi Budaya</h3>
+                            <p>Dapatkan informasi mendalam tentang sejarah, makna, dan karakteristik setiap karakter wayang kulit untuk pembelajaran yang komprehensif.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        // Comprehensive Character Database
+        const characterDatabase = {
+            'Arjuna': {
+                pronunciation: 'AR-ju-na',
+                role: 'Kesatria Pandawa',
+                characteristics: 'Tampan, bijaksana, ahli memanah',
+                story: 'Arjuna adalah kesatria ketiga dari lima bersaudara Pandawa. Dikenal sebagai pemanah terbaik di dunia, ia memiliki sifat yang tenang, bijaksana, dan sangat tampan. Dalam perang Bharatayudha, Arjuna menjadi tokoh sentral yang dipandu oleh Krishna.',
+                symbolism: 'Melambangkan keseimbangan antara kekuatan fisik dan spiritual',
+                visualTraits: 'Berpostur tinggi, memakai mahkota, membawa panah dan busur',
+                family: 'Putra Pandu dan Kunti, suami Draupadi dan Subhadra'
+            },
+            'Bima': {
+                pronunciation: 'BI-ma',
+                role: 'Kesatria Pandawa',
+                characteristics: 'Kuat, pemberani, jujur, temperamental',
+                story: 'Bima atau Werkudara adalah kesatria kedua dari lima bersaudara Pandawa. Memiliki kekuatan fisik yang luar biasa dan sifat yang jujur namun mudah marah. Ia dikenal dengan kuku pancanaka-nya yang dapat merobek apapun.',
+                symbolism: 'Melambangkan kekuatan, kejujuran, dan keadilan',
+                visualTraits: 'Bertubuh besar dan kekar, berambut gimbal, memakai kuku pancanaka',
+                family: 'Putra Pandu dan Kunti, ayah dari Gatotkaca'
+            },
+            'Yudhistira': {
+                pronunciation: 'yu-dhis-TI-ra',
+                role: 'Raja Pandawa',
+                characteristics: 'Bijaksana, adil, religius, jujur',
+                story: 'Yudhistira adalah kakak tertua dari lima bersaudara Pandawa dan menjadi raja mereka. Dikenal dengan kebijaksanaan dan kejujurannya yang luar biasa, ia tidak pernah berbohong sepanjang hidupnya. Gelar Dharmaputra menunjukkan ketaatannya pada dharma.',
+                symbolism: 'Melambangkan kepemimpinan yang bijaksana dan kebenaran',
+                visualTraits: 'Berpostur sedang, memakai mahkota raja, wajah tenang dan bijaksana',
+                family: 'Putra Pandu dan Kunti, suami Draupadi'
+            },
+            'Nakula': {
+                pronunciation: 'na-KU-la',
+                role: 'Kesatria Pandawa',
+                characteristics: 'Tampan, ahli pedang, pandai mengobati kuda',
+                story: 'Nakula adalah kesatria keempat dari lima bersaudara Pandawa, anak kembar dengan Sadewa. Ia dikenal sangat tampan dan ahli dalam ilmu pengobatan hewan, terutama kuda. Nakula juga mahir dalam seni bela diri dengan pedang.',
+                symbolism: 'Melambangkan keindahan dan kepedulian terhadap makhluk hidup',
+                visualTraits: 'Berpostur sedang, wajah tampan, membawa pedang',
+                family: 'Putra Pandu dan Madri, kembar dengan Sadewa'
+            },
+            'Sadewa': {
+                pronunciation: 'sa-DE-wa',
+                role: 'Kesatria Pandawa',
+                characteristics: 'Bijaksana, ahli astronomi, pandai ramalan',
+                story: 'Sadewa adalah kesatria termuda dari lima bersaudara Pandawa, anak kembar dengan Nakula. Ia memiliki kemampuan khusus dalam ilmu astronomi dan ramalan. Sadewa sering memberikan nasihat strategis berdasarkan pengetahuannya tentang waktu dan nasib.',
+                symbolism: 'Melambangkan kebijaksanaan dan pengetahuan tentang masa depan',
+                visualTraits: 'Berpostur sedang, wajah tenang dan bijaksana, sering membawa kitab',
+                family: 'Putra Pandu dan Madri, kembar dengan Nakula'
+            },
+            'Kresna': {
+                pronunciation: 'KRES-na',
+                role: 'Avatar Wisnu, Guru Spiritual',
+                characteristics: 'Bijaksana, penuh kasih, mahakuasa',
+                story: 'Kresna adalah avatar kedelapan dari Dewa Wisnu yang menjadi guru spiritual dan pembimbing Pandawa. Dalam Bharatayudha, ia menjadi kusir kereta Arjuna dan memberikan ajaran Bhagavad Gita. Krishna melambangkan cinta kasih dan kebijaksanaan ilahi.',
+                symbolism: 'Melambangkan cinta kasih ilahi dan pembimbingan spiritual',
+                visualTraits: 'Berkulit biru, memakai mahkota, sering membawa suling atau cakra',
+                family: 'Avatar Wisnu, sepupu Pandawa'
+            },
+            'Duryudana': {
+                pronunciation: 'dur-yo-DA-na',
+                role: 'Raja Kurawa',
+                characteristics: 'Ambisius, sombong, iri hati, namun pemberani',
+                story: 'Duryudana adalah raja dari seratus bersaudara Kurawa dan musuh utama Pandawa. Meskipun memiliki sifat negatif seperti iri hati dan sombong, ia juga seorang kesatria yang pemberani. Konfliknya dengan Pandawa memicu perang besar Bharatayudha.',
+                symbolism: 'Melambangkan sifat-sifat negatif manusia yang harus diatasi',
+                visualTraits: 'Berpostur besar, memakai mahkota raja, ekspresi sombong',
+                family: 'Putra Dhritarashtra, pemimpin Kurawa'
+            },
+            'Karna': {
+                pronunciation: 'KAR-na',
+                role: 'Kesatria Kurawa',
+                characteristics: 'Pemberani, setia, dermawan, tragis',
+                story: 'Karna adalah kesatria yang lahir dari Kunti sebelum menikah, namun dibesarkan oleh keluarga kusir. Meskipun sebenarnya kakak Pandawa, ia berpihak pada Kurawa karena kesetiaan. Karna dikenal sebagai dermawan yang tidak pernah menolak permintaan.',
+                symbolism: 'Melambangkan kesetiaan, kemurahan hati, dan tragedi takdir',
+                visualTraits: 'Berpostur gagah, memakai anting emas, membawa panah',
+                family: 'Putra Kunti dan Surya, kakak Pandawa namun berpihak Kurawa'
+            },
+            'Drupadi': {
+                pronunciation: 'dru-PA-di',
+                role: 'Ratu Pandawa',
+                characteristics: 'Cantik, cerdas, berkarakter kuat, setia',
+                story: 'Drupadi adalah istri bersama kelima Pandawa yang lahir dari api suci. Ia memiliki kecantikan luar biasa dan karakter yang kuat. Penghinaan terhadap Drupadi di istana Kurawa menjadi salah satu pemicu utama perang Bharatayudha.',
+                symbolism: 'Melambangkan kehormatan wanita dan keadilan',
+                visualTraits: 'Sangat cantik, berambut panjang, memakai mahkota ratu',
+                family: 'Putri Raja Drupada, istri kelima Pandawa'
+            },
+            'Gatotkaca': {
+                pronunciation: 'ga-tot-KA-ca',
+                role: 'Kesatria Sakti',
+                characteristics: 'Kuat, dapat terbang, setia, pemberani',
+                story: 'Gatotkaca adalah putra Bima dengan Hidimbi (raksasi). Ia memiliki kemampuan terbang dan kekuatan luar biasa. Dalam perang Bharatayudha, Gatotkaca berkorban untuk melindungi Pandawa dengan menabrakkan dirinya ke Karna.',
+                symbolism: 'Melambangkan pengorbanan dan kesetiaan pada keluarga',
+                visualTraits: 'Bertubuh besar, dapat terbang, memakai baju zirah',
+                family: 'Putra Bima dan Hidimbi'
+            },
+            'Semar': {
+                pronunciation: 'SE-mar',
+                role: 'Punakawan, Dewa Penyamar',
+                characteristics: 'Bijaksana, humoris, setia, sakti',
+                story: 'Semar adalah punakawan yang sebenarnya adalah Dewa Ismaya yang menyamar. Ia menjadi pelindung dan penasihat Pandawa dengan cara yang unik - melalui humor dan kebijaksanaan sederhana. Semar melambangkan rakyat jelata yang bijaksana.',
+                symbolism: 'Melambangkan kebijaksanaan rakyat dan kerendahan hati',
+                visualTraits: 'Bertubuh gemuk, berambut putih, selalu tersenyum',
+                family: 'Ayah Gareng, Petruk, dan Bagong'
+            },
+            'Gareng': {
+                pronunciation: 'GA-reng',
+                role: 'Punakawan',
+                characteristics: 'Humoris, setia, cacat fisik namun berhati mulia',
+                story: 'Gareng adalah punakawan putra Semar yang memiliki cacat fisik (tangan dan kaki bengkok) namun memiliki hati yang mulia. Ia sering memberikan nasihat melalui sindiran halus dan humor. Gareng melambangkan bahwa kesempurnaan batin lebih penting dari fisik.',
+                symbolism: 'Melambangkan bahwa kecacatan fisik tidak menghalangi kemuliaan hati',
+                visualTraits: 'Bertubuh kecil, tangan dan kaki bengkok, selalu ceria',
+                family: 'Putra Semar, kakak Petruk dan Bagong'
+            },
+            'Petruk': {
+                pronunciation: 'PET-ruk',
+                role: 'Punakawan',
+                characteristics: 'Humoris, polos, jujur, suka bertanya',
+                story: 'Petruk adalah punakawan putra Semar yang memiliki hidung panjang dan sifat yang polos. Ia sering bertanya hal-hal yang tampak sederhana namun mengandung makna filosofis mendalam. Petruk melambangkan keingintahuan dan kejujuran.',
+                symbolism: 'Melambangkan rasa ingin tahu dan kejujuran yang polos',
+                visualTraits: 'Bertubuh tinggi kurus, hidung panjang, ekspresi polos',
+                family: 'Putra Semar, adik Gareng, kakak Bagong'
+            },
+            'Bagong': {
+                pronunciation: 'BA-gong',
+                role: 'Punakawan',
+                characteristics: 'Humoris, nakal, cerdik, berani',
+                story: 'Bagong adalah punakawan termuda putra Semar yang paling nakal dan berani. Ia sering membuat lelucon dan kritik sosial yang tajam. Meskipun tampak main-main, Bagong sering memberikan solusi cerdik untuk berbagai masalah.',
+                symbolism: 'Melambangkan keberanian mengkritik dan semangat muda',
+                visualTraits: 'Bertubuh gemuk pendek, mulut lebar, ekspresi nakal',
+                family: 'Putra Semar, adik bungsu Gareng dan Petruk'
+            },
+            'Srikandi': {
+                pronunciation: 'sri-KAN-di',
+                role: 'Kesatria Wanita',
+                characteristics: 'Pemberani, ahli memanah, berjiwa kesatria',
+                story: 'Srikandi adalah kesatria wanita yang ahli dalam seni memanah. Ia adalah istri Arjuna yang memiliki jiwa kesatria dan tidak takut berperang. Srikandi berhasil membunuh Bisma dalam perang Bharatayudha dengan bantuan Sikhandi.',
+                symbolism: 'Melambangkan kekuatan dan keberanian wanita',
+                visualTraits: 'Berpostur tegap, membawa panah dan busur, berpakaian kesatria',
+                family: 'Istri Arjuna, putri Drupada'
+            },
+            'Bisma': {
+                pronunciation: 'BIS-ma',
+                role: 'Panglima Kurawa',
+                characteristics: 'Bijaksana, sakti, setia, tidak dapat dikalahkan',
+                story: 'Bisma adalah kakek dari Pandawa dan Kurawa yang menjadi panglima perang Kurawa. Ia memiliki anugerah tidak dapat mati kecuali atas kehendaknya sendiri. Bisma adalah sosok yang sangat dihormati karena kebijaksanaan dan kesaktiannya.',
+                symbolism: 'Melambangkan kebijaksanaan usia dan kesetiaan pada sumpah',
+                visualTraits: 'Berambut putih, berpostur tinggi, membawa senjata panah',
+                family: 'Kakek Pandawa dan Kurawa'
+            },
+            'Drona': {
+                pronunciation: 'DRO-na',
+                role: 'Guru Senjata',
+                characteristics: 'Bijaksana, ahli senjata, guru yang baik',
+                story: 'Drona adalah guru senjata bagi Pandawa dan Kurawa. Ia mengajarkan berbagai ilmu perang dan senjata kepada kedua belah pihak. Dalam perang Bharatayudha, Drona terpaksa memihak Kurawa karena hutang budi, meskipun hatinya berpihak pada Pandawa.',
+                symbolism: 'Melambangkan dilema antara hutang budi dan kebenaran',
+                visualTraits: 'Berpostur sedang, memakai pakaian guru, membawa senjata',
+                family: 'Ayah Aswatama, guru Pandawa dan Kurawa'
+            },
+            'Abimanyu': {
+                pronunciation: 'a-bi-MAN-yu',
+                role: 'Kesatria Muda',
+                characteristics: 'Pemberani, muda, ahli perang, heroik',
+                story: 'Abimanyu adalah putra Arjuna dan Subhadra yang menjadi kesatria muda pemberani. Ia menguasai cara masuk ke formasi Chakravyuha namun tidak tahu cara keluarnya. Kematian heroiknya dalam perang menjadi salah satu episode paling tragis dalam Mahabharata.',
+                symbolism: 'Melambangkan keberanian muda dan pengorbanan heroik',
+                visualTraits: 'Berpostur muda dan gagah, membawa senjata, ekspresi pemberani',
+                family: 'Putra Arjuna dan Subhadra'
+            },
+            'Kunti': {
+                pronunciation: 'KUN-ti',
+                role: 'Ibu Pandawa',
+                characteristics: 'Bijaksana, penyayang, kuat, penyabar',
+                story: 'Kunti adalah ibu dari tiga Pandawa (Yudhistira, Bima, Arjuna) dan juga Karna. Ia memiliki mantra sakti yang dapat memanggil dewa untuk mendapatkan anak. Kunti adalah sosok ibu yang bijaksana dan selalu mendukung anak-anaknya.',
+                symbolism: 'Melambangkan kasih sayang ibu dan kebijaksanaan wanita',
+                visualTraits: 'Berpakaian sederhana, ekspresi bijaksana dan penyayang',
+                family: 'Istri Pandu, ibu Pandawa dan Karna'
+            },
+            'Subhadra': {
+                pronunciation: 'sub-HAD-ra',
+                role: 'Istri Arjuna',
+                characteristics: 'Cantik, setia, penyayang, bijaksana',
+                story: 'Subhadra adalah adik Krishna yang menjadi istri Arjuna dan ibu dari Abimanyu. Ia dikenal sebagai wanita yang cantik, setia, dan bijaksana. Subhadra sangat mencintai keluarganya dan mendukung perjuangan Pandawa.',
+                symbolism: 'Melambangkan kesetiaan dan kasih sayang dalam keluarga',
+                visualTraits: 'Sangat cantik, berpakaian istana, ekspresi lembut',
+                family: 'Adik Krishna, istri Arjuna, ibu Abimanyu'
+            },
+            'Sengkuni': {
+                pronunciation: 'seng-KU-ni',
+                role: 'Penasihat Kurawa',
+                characteristics: 'Licik, cerdik, manipulatif, setia pada Kurawa',
+                story: 'Sengkuni adalah paman Duryudana yang menjadi dalang di balik berbagai intrik dan tipu muslihat Kurawa. Ia sangat cerdik dalam merencanakan strategi untuk mengalahkan Pandawa, meskipun caranya sering tidak fair. Sengkuni melambangkan kecerdikan yang disalahgunakan.',
+                symbolism: 'Melambangkan kecerdikan yang disalahgunakan untuk kejahatan',
+                visualTraits: 'Berpostur kecil, ekspresi licik, sering membawa dadu',
+                family: 'Paman dan penasihat Duryudana'
+            },
+            'Nakula Sadewa': {
+                pronunciation: 'na-KU-la sa-DE-wa',
+                role: 'Kesatria Pandawa Kembar',
+                characteristics: 'Nakula: tampan, ahli pedang, pandai mengobati kuda. Sadewa: bijaksana, ahli astronomi, pandai ramalan',
+                story: 'Nakula dan Sadewa adalah kesatria keempat dan kelima dari lima bersaudara Pandawa, anak kembar dari Pandu dan Madri. Nakula dikenal sangat tampan dan ahli dalam ilmu pengobatan hewan, terutama kuda, serta mahir dalam seni bela diri dengan pedang. Sadewa memiliki kemampuan khusus dalam ilmu astronomi dan ramalan, sering memberikan nasihat strategis berdasarkan pengetahuannya tentang waktu dan nasib. Keduanya melengkapi satu sama lain - Nakula dengan kecantikan dan kepedulian terhadap makhluk hidup, Sadewa dengan kebijaksanaan dan pengetahuan tentang masa depan.',
+                symbolism: 'Melambangkan keseimbangan antara keindahan fisik dan kebijaksanaan spiritual, serta pentingnya persaudaraan',
+                visualTraits: 'Nakula berpostur sedang dengan wajah tampan membawa pedang, Sadewa berpostur sedang dengan wajah tenang dan bijaksana sering membawa kitab',
+                family: 'Putra Pandu dan Madri, adik dari Yudhistira, Bima, dan Arjuna'
+            }
+        };
+
+        // DOM Elements
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewImage = document.getElementById('previewImage');
+        const uploadForm = document.getElementById('uploadForm');
+        const loading = document.getElementById('loading');
+
+        // Function to populate character information
+        function populateCharacterInfo(characterName) {
+            const characterDetails = document.getElementById('characterDetails');
+            const character = characterDatabase[characterName];
+
+            if (character && characterDetails) {
+                characterDetails.innerHTML = `
+                    <div style="text-align: center; margin-bottom: 2rem;">
+                        <h3 style="font-family: 'Work Sans', sans-serif; font-size: 1.8rem; color: var(--primary); margin-bottom: 0.5rem;">
+                            ${characterName}
+                            <span class="pronunciation">${character.pronunciation}</span>
+                        </h3>
+                        <p style="color: var(--text-secondary); font-style: italic;">${character.role}</p>
+                    </div>
+
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">🎭 Karakteristik</div>
+                            <div class="info-value">${character.characteristics}</div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-label">👁️ Ciri Visual</div>
+                            <div class="info-value">${character.visualTraits}</div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-label">🏛️ Simbolisme</div>
+                            <div class="info-value">${character.symbolism}</div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-label">👨‍👩‍👧‍👦 Keluarga</div>
+                            <div class="info-value">${character.family}</div>
+                        </div>
+                    </div>
+
+                    <div class="character-story">
+                        <div class="story-title">
+                            📖 Kisah & Latar Belakang
+                        </div>
+                        <p>${character.story}</p>
+                    </div>
+                `;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const prediction = '{{ prediction or "" }}';
+            if (prediction) {
+                populateCharacterInfo(prediction);
+            }
+        });
+
+        // Event Listeners
+        uploadArea.addEventListener('click', handleUploadAreaClick);
+        uploadArea.addEventListener('dragover', handleDragOver);
+        uploadArea.addEventListener('drop', handleDrop);
+        uploadArea.addEventListener('dragleave', handleDragLeave);
+        fileInput.addEventListener('change', handleFileSelect);
+        imagePreview.addEventListener('dblclick', resetUpload);
+
+        uploadForm.addEventListener('submit', function(e) {
+            showLoading();
+        });
+
+        // Drag and Drop Handlers
+        function handleDragOver(e) {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        }
+
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) {
+                alert('Silakan pilih file gambar yang valid.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                imagePreview.style.display = 'block';
+                uploadArea.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function showLoading() {
+            loading.style.display = 'block';
+        }
+
+        function resetUpload() {
+            uploadArea.style.display = 'block';
+            imagePreview.style.display = 'none';
+            fileInput.value = '';
+        }
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        function handleUploadAreaClick() {
+            // Only trigger file input if no image is currently previewed
+            if (imagePreview.style.display === 'none' || !imagePreview.style.display) {
+                fileInput.click();
+            }
+        }
+    </script>
+</body>
+</html>

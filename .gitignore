@@ -1,4 +1,4 @@
 # Project exclude paths
-/runs/
-/logs/
-/data/
+/data/*
+/models/non-augmented/*
+/.idea
