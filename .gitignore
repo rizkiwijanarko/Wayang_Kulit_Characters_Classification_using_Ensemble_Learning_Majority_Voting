@@ -2,3 +2,5 @@
 /data/*
 /models/non-augmented/*
 /.idea
+.venv
+/wayang_classifier_web/models/*
