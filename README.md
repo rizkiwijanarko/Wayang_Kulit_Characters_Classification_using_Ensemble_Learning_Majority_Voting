@@ -10,6 +10,11 @@ This project leverages Ensemble Learning with three powerful architectures:
 
 By combining the predictions of these three models, the system achieves more robust and accurate classification of various Wayang characters compared to a single model approach.
 
+## Preview
+### Flask Web Interface
+![Preview 1](preview/preview_1.png)
+![Preview 2](preview/preview_2.png)
+
 ## Features
 - **Ensemble Inference**: Uses majority voting from three different pre-trained models.
 - **Web Interface**: Simple Flask-based web application to upload images and get instant classification.
